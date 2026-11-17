@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kewu Li — Data Science &amp; Distributed Computing</title>
+<meta name="description" content="Personal page of Kewu Li, undergraduate in Data Science and Big Data Technology at Xi'an Jiaotong-Liverpool University." />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+<header class="site-header" id="top">
+  <nav class="nav">
+    <a class="brand" href="#top"><span class="brand-mark">KL</span><span class="brand-text">Kewu Li</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle colour theme" title="Toggle colour theme">
+      <span class="dot"></span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Data Science · Distributed Computing · Networking</p>
+        <h1>Hi, I'm <span class="accent">Kewu Li</span>.</h1>
+        <p class="lede">
+          Third-year undergraduate in <strong>Data Science and Big Data Technology</strong>
+          at Xi'an Jiaotong-Liverpool University (Taicang). I build data pipelines,
+          measure how distributed systems behave under load, and turn raw logs into
+          something people can actually read.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#projects">See my projects</a>
+          <a class="btn ghost" href="#contact">Get in touch</a>
+        </div>
+        <ul class="hero-stats">
+          <li><span class="stat-value">HDFS</span><span class="stat-label">cluster work</span></li>
+          <li><span class="stat-value">PySpark</span><span class="stat-label">large-scale analysis</span></li>
+          <li><span class="stat-value">TCP / UDP</span><span class="stat-label">protocol experiments</span></li>
+        </ul>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orb"></div>
+        <div class="ring ring-one"></div>
+        <div class="ring ring-two"></div>
+        <svg class="network" viewBox="0 0 320 320" role="presentation">
+          <g class="nodes">
+            <circle cx="160" cy="60" r="9" />
+            <circle cx="90" cy="150" r="9" />
+            <circle cx="230" cy="150" r="9" />
+            <circle cx="120" cy="250" r="9" />
+            <circle cx="205" cy="250" r="9" />
+          </g>
+          <g class="links">
+            <line x1="160" y1="60" x2="90" y2="150" />
+            <line x1="160" y1="60" x2="230" y2="150" />
+            <line x1="90" y1="150" x2="120" y2="250" />
+            <line x1="230" y1="150" x2="205" y2="250" />
+            <line x1="90" y1="150" x2="230" y2="150" />
+            <line x1="120" y1="250" x2="205" y2="250" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="section reveal">
+    <div class="section-head">
+      <span class="section-index">01</span>
+      <h2>About</h2>
+    </div>
+    <div class="two-col">
+      <p>
+        I study how data moves. Coursework and projects so far have taken me from
+        socket-level packet capture to multi-node Spark jobs: implementing a video
+        streaming protocol over TCP and UDP, comparing MapReduce and Spark on the
+        same corpus, and training MLlib models on census data.
+      </p>
+      <p>
+        Outside the lab I am interested in education technology — I contributed to
+        <em>SevenBits</em>, an AI-assisted question answering platform for course
+        materials, where the interesting problem was not the model but how students
+        actually phrased their questions.
+      </p>
+    </div>
+  </section>
+
+  <section id="skills" class="section reveal">
+    <div class="section-head">
+      <span class="section-index">02</span>
+      <h2>Skills</h2>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <h3>Distributed systems</h3>
+        <p>Hadoop HDFS &amp; MapReduce, Apache Spark (RDD and DataFrame APIs), cluster configuration, job tuning.</p>
+        <div class="tags"><span>HDFS</span><span>YARN</span><span>Spark</span><span>MLlib</span></div>
+      </article>
+      <article class="card">
+        <h3>Networking</h3>
+        <p>Socket programming in Python, TCP vs UDP behaviour, packet analysis with Wireshark, latency and jitter measurement.</p>
+        <div class="tags"><span>TCP/IP</span><span>UDP</span><span>Wireshark</span><span>DNS</span></div>
+      </article>
+      <article class="card">
+        <h3>Data &amp; code</h3>
+        <p>Python, Java, SQL, pandas, scikit-learn, Matplotlib; data cleaning, feature engineering and evaluation.</p>
+        <div class="tags"><span>Python</span><span>Java</span><span>SQL</span><span>Git</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="projects" class="section reveal">
+    <div class="section-head">
+      <span class="section-index">03</span>
+      <h2>Projects</h2>
+    </div>
+    <div class="projects">
+      <article class="project">
+        <div class="project-meta"><span class="chip">CSI205TC</span><span class="year">2026</span></div>
+        <h3>Video streaming over TCP and UDP</h3>
+        <p>
+          Built a Python socket streaming system in both flavours, split JPEG frames into
+          MTU-sized chunks for UDP, and captured the traffic to compare delivery ratio,
+          latency and jitter under paced and unpaced sending.
+        </p>
+        <p class="result">Result: TCP delivered 160/160 frames in every scenario; unpaced UDP lost 90.6% of frames at the receiver socket buffer.</p>
+      </article>
+      <article class="project">
+        <div class="project-meta"><span class="chip">CSI205TC</span><span class="year">2026</span></div>
+        <h3>Hadoop vs Spark word count benchmark</h3>
+        <p>
+          Wrote the same job twice — a Java MapReduce program with a combiner and a
+          PySpark RDD pipeline — then ran both three times over a 20 MB text corpus
+          and verified that the counts matched exactly.
+        </p>
+        <p class="result">Result: 3.69 M words, 75,985 distinct; Spark finished the job in 2.78 s against 5.02 s for Hadoop.</p>
+      </article>
+      <article class="project">
+        <div class="project-meta"><span class="chip">Coursework</span><span class="year">2026</span></div>
+        <h3>Income prediction with Spark MLlib</h3>
+        <p>
+          Full ML pipeline on the UCI Adult dataset: missing-value handling, string
+          indexing, one-hot encoding, scaling, hyper-parameter search, and evaluation
+          of logistic regression against a random forest.
+        </p>
+        <p class="result">Result: AUC 0.905 (LR) and 0.904 (RF) on the official test split.</p>
+      </article>
+      <article class="project">
+        <div class="project-meta"><span class="chip">ENT207TC</span><span class="year">2025 — 2026</span></div>
+        <h3>SevenBits — AI question answering for course materials</h3>
+        <p>
+          Part of the student team building an AI assistant that answers questions
+          grounded in lecture notes and past papers, with a focus on how students
+          phrase questions and where retrieval fails.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="education" class="section reveal">
+    <div class="section-head">
+      <span class="section-index">04</span>
+      <h2>Education</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-when">2023 — present</div>
+        <div class="timeline-what">
+          <h3>BSc Data Science and Big Data Technology</h3>
+          <p>Xi'an Jiaotong-Liverpool University, Taicang campus · Student ID 2468629</p>
+          <p class="muted">Relevant modules: Networking and Distributed Computing, Data Mining, Machine Learning, Database Systems.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section reveal">
+    <div class="section-head">
+      <span class="section-index">05</span>
+      <h2>Contact</h2>
+    </div>
+    <div class="contact-card">
+      <p>Happy to talk about distributed systems, data pipelines, or coursework.</p>
+      <ul class="contact-list">
+        <li><span>GitHub</span><a href="https://github.com/Lkw919" id="githubLink" rel="noopener">github.com/Lkw919</a></li>
+        <li><span>Website</span><a href="https://lkw919.github.io/" rel="noopener">lkw919.github.io</a></li>
+        <li><span>Email</span><a href="mailto:Kewu.Li@student.xjtlu.edu.cn">Kewu.Li@student.xjtlu.edu.cn</a></li>
+        <li><span>Location</span><span class="plain">Taicang, Jiangsu, China</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="year">2026</span> Kewu Li · Built with plain HTML, CSS and JavaScript · Hosted on GitHub Pages</p>
+  <a href="#top" class="to-top">Back to top</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
