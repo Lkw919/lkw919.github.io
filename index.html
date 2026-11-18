@@ -16,6 +16,7 @@
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
       <li><a href="#projects">Projects</a></li>
+      <li><a href="analysis.html">Analysis</a></li>
       <li><a href="#education">Education</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
@@ -123,6 +124,17 @@
       <h2>Projects</h2>
     </div>
     <div class="projects">
+      <article class="project">
+        <div class="project-meta"><span class="chip">CSI205TC</span><span class="year">2026</span></div>
+        <h3>What a GitHub Pages request actually costs</h3>
+        <p>
+          Measured this page's own delivery: DNS against a anycast pool, ICMP round trip on
+          both address families, traceroute, per-stage TLS timings, and a packet capture read
+          for handshake and cipher behaviour.
+        </p>
+        <p class="result">Result: IPv6 132 ms and lossless over 18 hops against IPv4 231 ms with 20 % ICMP loss; one SYN backoff of 1-2-4 s cost a single handshake 3.39 s.</p>
+        <p><a class="btn ghost" href="analysis.html">Read the measurements</a></p>
+      </article>
       <article class="project">
         <div class="project-meta"><span class="chip">CSI205TC</span><span class="year">2026</span></div>
         <h3>Video streaming over TCP and UDP</h3>

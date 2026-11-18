@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What a GitHub Pages request actually costs — Kewu Li</title>
+<meta name="description" content="Measured network analysis of a GitHub Pages request: DNS, anycast, ICMP round-trip time, traceroute, TLS handshake stages and a packet capture. CSI205TC, November 2026." />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+<header class="site-header" id="top">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="brand-mark">KL</span><span class="brand-text">Kewu Li</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#skills">Skills</a></li>
+      <li><a href="index.html#projects">Projects</a></li>
+      <li><a href="analysis.html" aria-current="page">Analysis</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle colour theme" title="Toggle colour theme">
+      <span class="dot"></span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <section class="section" style="padding-top:3.5rem">
+    <p class="eyebrow">Network analysis · CSI205TC · 17 November 2026</p>
+    <h1 style="font-size:2.1rem;letter-spacing:-0.02em;margin:0.6rem 0 1rem">
+      What a GitHub Pages request actually costs
+    </h1>
+    <p class="lede" style="max-width:70ch">
+      A page that loads in a second is doing more than it looks: a DNS lookup against a
+      anycast pool, an ICMP path that half-answers, a TCP handshake that may have to back
+      off, and a TLS negotiation. These are measurements of this site — taken from a
+      dual-stack laptop on a university campus network, plus one packet capture — and they
+      describe the two address families differently for reasons that are only partly
+      about distance.
+    </p>
+
+    <div class="stat-strip">
+      <div><strong>231 ms</strong><span>IPv4 round trip, 8 of 10 replies</span></div>
+      <div><strong>132 ms</strong><span>IPv6 round trip, 10 of 10 replies</span></div>
+      <div><strong>231</strong><span>packets in the capture</span></div>
+      <div><strong>TLS 1.3</strong><span>AES-128-GCM, chosen by the server</span></div>
+    </div>
+
+    <div class="prose">
+
+      <h3>01 · DNS: four addresses per family, one anycast pool each</h3>
+      <p>
+        <code>lkw919.github.io</code> resolves to four IPv4 and four IPv6 addresses. Both
+        pools belong to the CDN in front of Pages, which is why the same name answers from
+        whichever edge is nearest rather than from a fixed host.
+      </p>
+      <table class="datatable">
+        <caption>Resolution of lkw919.github.io from the campus resolver</caption>
+        <thead><tr><th>Record</th><th>Addresses</th><th>TTL</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>185.199.108.153 … 185.199.111.153 (four in <code>185.199.108.0/22</code>)</td><td class="num">600 s</td></tr>
+          <tr><td>AAAA</td><td>2606:50c0:8000::153 … ::8003::153</td><td class="num">600 s</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The campus resolver answered in 6–21 ms. A 600-second TTL is short enough that an
+        address change on the CDN side propagates in ten minutes, and long enough that a
+        browser opening the same page twice does not pay for the lookup again. The IPv6
+        prefix sits inside the same CDN's allocation, which matches the HTTP headers below:
+        this is a CDN-fronted service, not a single origin server.
+      </p>
+
+      <h3>02 · Round trip: the two families disagree</h3>
+      <figure class="figure">
+        <img src="assets/figs/rtt.png" alt="Bar chart of ICMP round-trip time for IPv4 and IPv6 probes to the same site" />
+        <figcaption>Ten ICMP probes per family, same host, same minute. IPv6 is both faster and lossless here.</figcaption>
+      </figure>
+      <table class="datatable">
+        <caption>ICMP echo, ten probes per family</caption>
+        <thead><tr><th>Family</th><th>Replies</th><th>Mean</th><th>Min–max</th></tr></thead>
+        <tbody>
+          <tr><td>IPv4</td><td class="num">8 / 10</td><td class="num">231 ms</td><td class="num">226–237 ms</td></tr>
+          <tr><td>IPv6</td><td class="num">10 / 10</td><td class="num">132 ms</td><td class="num">123–157 ms</td></tr>
+        </tbody>
+      </table>
+      <p>
+        A hundred milliseconds is not a measurement artefact: the two stacks take different
+        paths to the same city. The IPv4 probes also lost two packets, and the traceroute
+        below suggests why — the destination and several carriers in between simply do not
+        return TTL-expired messages, so a silent hop is indistinguishable from a dropped
+        probe at this layer.
+      </p>
+
+      <h3>03 · Path: 20 hops versus 18, and a carrier-grade NAT in the middle</h3>
+      <p>
+        The IPv4 trace leaves campus at the fifth responding hop, crosses the CERNET backbone
+        (<code>219.219.x</code>, <code>101.4.x</code>), passes a carrier-grade NAT hop in
+        <code>100.64.0.0/10</code> — the range set aside precisely for that, since it is not
+        routable on the public internet — and then hands over to transit
+        (<code>80.239.x</code>, <code>62.115.x</code> at 136 ms). The destination never
+        answered with TTL-expired, so the trace ends at the 20-hop limit rather than at the
+        host.
+      </p>
+      <p>
+        The IPv6 trace is both shorter and cleaner: campus (<code>2001:250:500f::/48</code>) →
+        CERNET2 (<code>2001:da8::/32</code>) → <code>2001:252::/32</code> → transit
+        <code>2400:8800::/24</code> → destination in 18 hops, arriving at 123 ms — which
+        equals the IPv6 echo average. It does not traverse the IPv4 NAT hop at all.
+      </p>
+      <div class="note">
+        <strong>Why the numbers move between runs.</strong> ICMP is rate-limited and
+        deprioritised on most carriers. The mean of ten probes is a description of one
+        afternoon on one campus network, not a property of the service.
+      </div>
+
+      <h3>04 · HTTPS: where the time actually goes</h3>
+      <figure class="figure">
+        <img src="assets/figs/stages.png" alt="Stacked bar chart breaking the HTTPS fetch into DNS, TCP, TLS, first byte and transfer stages for IPv6 and IPv4" />
+        <figcaption>Each fetch decomposed into stages. The IPv6 bar is dominated by one stage.</figcaption>
+      </figure>
+      <table class="datatable">
+        <caption>One representative fetch per family, timing tool output converted to per-stage durations</caption>
+        <thead><tr><th>Stage</th><th>IPv6</th><th>IPv4</th></tr></thead>
+        <tbody>
+          <tr><td>DNS lookup</td><td class="num">7 ms</td><td class="num">10 ms</td></tr>
+          <tr><td>TCP handshake</td><td class="num">153 ms</td><td class="num">230 ms</td></tr>
+          <tr><td>TLS handshake</td><td class="num">4,148 ms</td><td class="num">536 ms</td></tr>
+          <tr><td>Time to first byte</td><td class="num">147 ms</td><td class="num">971 ms</td></tr>
+          <tr><td>Content transfer</td><td class="num">155 ms</td><td class="num">0 ms</td></tr>
+          <tr><td><strong>Total</strong></td><td class="num"><strong>4.61 s</strong></td><td class="num"><strong>1.75 s</strong></td></tr>
+        </tbody>
+      </table>
+      <p>
+        The IPv4 column is what the round-trip time predicts: TCP handshake, then TLS, then
+        first byte, each roughly a round trip. The IPv6 column is not. Four seconds inside a
+        TLS handshake on a 132 ms path comes from the client stack, not the network: the
+        Windows client logged <em>“remote party requests renegotiation”</em> and renegotiated
+        mid-handshake. Run the same request from a browser using a different TLS
+        implementation and the anomaly disappears.
+      </p>
+      <p>
+        The honest reading is that “which address family is faster” is a question about
+        layers 5–7 as much as about layer 3. A faster path can still produce a slower page.
+      </p>
+
+      <h3>05 · What the capture shows</h3>
+      <p>
+        231 packets over one page load: 28 DNS, 203 TCP — 67 of those TLS — which is enough
+        to see the protocol structure even though the content itself is unreadable.
+      </p>
+      <ul>
+        <li>
+          <strong>DNS.</strong> Four queries, four responses, each answer carrying all four
+          addresses of its family with the 600-second TTL.
+        </li>
+        <li>
+          <strong>A handshake that had to back off.</strong> The first SYN to one of the edge
+          addresses went unanswered and was retransmitted at 0.31 s, 1.32 s, 2.34 s and
+          3.36 s — the textbook 1-2-4 second exponential backoff — before the SYN/ACK arrived
+          at 3.70 s. That single attempt paid 3.39 s for its handshake, which is why a fetch
+          from that host looked far worse than the ping average.
+        </li>
+        <li>
+          <strong>TLS 1.3, negotiated in the clear (the choice, not the content).</strong> The
+          Client Hello carries the server name and an ALPN list offering HTTP/2, plus thirteen
+          cipher suites including the TLS 1.3 set. The Server Hello selects
+          <code>TLS_AES_128_GCM_SHA256</code> — authenticated encryption with forward secrecy.
+        </li>
+        <li>
+          <strong>No plaintext request is visible,</strong> which is the point of the protocol.
+          What a passive observer keeps is metadata: the server name, the offered protocols,
+          certificate sizes and record timing.
+        </li>
+        <li>
+          <strong>Loss is real, not just ICMP shyness.</strong> Later retransmissions confirm
+          the path was dropping segments during the run, which is consistent with the 20 %
+          ICMP loss measured from the campus client.
+        </li>
+      </ul>
+
+      <h3>06 · HTTP behaviour and the edge</h3>
+      <p>
+        Plain <code>http://</code> answers <strong>301</strong> pointing at
+        <code>https://</code>, and the HTTPS response sets a one-year
+        <code>Strict-Transport-Security</code> header — so a browser that has visited once
+        stops trying plain HTTP altogether. That single header is why the capture had to
+        target port 443.
+      </p>
+      <p>
+        The response identifies the edge that served it: a Tokyo cache with a cold-cache miss
+        on the first fetch, which is the same city the round-trip times point at. The page is
+        about 21 kB in four files, and the three sub-resources came back on their own
+        connections at 0.60–0.63 s each — something a real browser avoids by reusing one
+        keep-alive connection and multiplexing.
+      </p>
+
+      <h3>07 · What these measurements do not say</h3>
+      <ul>
+        <li>One client, one vantage point, one day: this describes a campus network in November 2026, not GitHub Pages in general.</li>
+        <li>The capture came from a second host whose own egress is slower and lossier, so it is used for protocol structure — DNS, handshake, cipher choice — and not for latency conclusions.</li>
+        <li>The site is static: no back end, no forms, no database, so content delivery is the whole story here.</li>
+      </ul>
+
+      <h3>Method and raw material</h3>
+      <p>
+        Echo and path probes with the operating system's own tools, ten probes per family;
+        fetch timings from a command-line client reporting per-stage durations; the capture
+        taken with a packet analyser and read for DNS, TCP and TLS structure. The two figures
+        on this page are generated from the logs by a small script, so they can be regenerated
+        rather than redrawn by hand. The raw logs, the capture and the script live with the
+        coursework source.
+      </p>
+      <p style="margin-top:1.6rem">
+        <a class="btn ghost" href="index.html#projects">Back to projects</a>
+        <a class="btn ghost" href="index.html">Home</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="year">2026</span> Kewu Li · Measurements taken 17 November 2026 · Built with plain HTML, CSS and JavaScript</p>
+  <a href="#top" class="to-top">Back to top</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

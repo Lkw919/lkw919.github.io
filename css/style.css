@@ -338,3 +338,35 @@ a:hover { text-decoration: underline; }
   .nav-links { display: none; }
   .timeline-item { grid-template-columns: 1fr; gap: 0.5rem; }
 }
+
+/* ---------- analysis page ---------- */
+.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 2rem 0 2.4rem; }
+.stat-strip > div { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.15rem; }
+.stat-strip strong { display: block; font-size: 1.45rem; letter-spacing: -0.02em; color: var(--text); font-variant-numeric: tabular-nums; }
+.stat-strip span { display: block; margin-top: 0.35rem; font-size: 0.76rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.4; }
+
+.prose p { color: var(--muted); margin: 0 0 1rem; max-width: 80ch; }
+.prose h3 { font-size: 1.02rem; letter-spacing: 0.01em; color: var(--text); margin: 2rem 0 0.7rem; }
+.prose ul { color: var(--muted); margin: 0 0 1rem 1.15rem; max-width: 80ch; }
+.prose li { margin-bottom: 0.5rem; }
+.prose code { font-size: 0.86em; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 5px; padding: 0.08em 0.35em; color: var(--text); }
+.prose em { color: var(--text); font-style: italic; }
+
+.datatable { width: 100%; border-collapse: collapse; margin: 1.2rem 0 1.4rem; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.datatable caption { caption-side: top; text-align: left; font-size: 0.78rem; color: var(--muted); padding-bottom: 0.55rem; letter-spacing: 0.03em; }
+.datatable th, .datatable td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; color: var(--muted); }
+.datatable th { color: var(--text); font-weight: 600; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.datatable td.num { text-align: right; white-space: nowrap; }
+.datatable tbody tr:last-child td { border-bottom: none; }
+
+.figure { margin: 1.4rem 0 1.2rem; }
+.figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
+.figure figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; }
+
+.note { border-left: 3px solid var(--accent); background: var(--bg-soft); padding: 0.9rem 1.1rem; border-radius: 0 10px 10px 0; color: var(--muted); font-size: 0.9rem; margin: 1.4rem 0; max-width: 80ch; }
+.note strong { color: var(--text); }
+
+@media (max-width: 900px) {
+  .stat-strip { grid-template-columns: repeat(2, 1fr); }
+  .datatable { font-size: 0.84rem; }
+}
